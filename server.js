@@ -55,6 +55,24 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+// new user
+app.post('/api/exercise/new-user', async (req, res) => {
+    const user = new User({
+        username: req.body.username
+    })
+    try {
+        const result = await user.save();
+        return res.json({
+            username: result.username,
+            _id: result._id,
+        })
+    } catch (e) {
+        if (e.code == 11000) {
+            return res.send('username already taken');
+        }
+        return res.json(e);
+    }
+});
 
 // Not found middleware
 app.use((req, res, next) => {
