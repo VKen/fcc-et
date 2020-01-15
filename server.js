@@ -74,6 +74,16 @@ app.post('/api/exercise/new-user', async (req, res) => {
     }
 });
 
+// get users list
+app.get('/api/exercise/users', async (req, res) => {
+    try {
+        const users = await User.find({}, "username");
+        return res.json(users);
+    } catch (e) {
+        return res.json(e);
+    }
+});
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
