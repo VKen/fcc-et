@@ -3,7 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 
 const cors = require('cors')
-
+const shortid = require('shortid');
 const mongoose = require('mongoose')
 mongoose.connect(process.env.DB)
 
@@ -12,6 +12,37 @@ db.on('error', console.error.bind(console, 'mongodb connection error:'));
 db.once('open', _ => {
     console.log("mongod db connected");
 });
+
+const ExerciseSchema = new mongoose.Schema({
+    description: {
+        type: String,
+        required: true,
+    },
+    duration: {
+        type: Number,
+        required: true,
+    },
+    date: {
+        type: Date,
+        required: true,
+    },
+});
+
+const UserSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: shortid.generate(),
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    log: [ExerciseSchema],
+});
+
+
+const User = mongoose.model('User', UserSchema);
 
 app.use(cors())
 
