@@ -5,7 +5,13 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+mongoose.connect(process.env.DB)
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'mongodb connection error:'));
+db.once('open', _ => {
+    console.log("mongod db connected");
+});
 
 app.use(cors())
 
