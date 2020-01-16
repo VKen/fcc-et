@@ -32,6 +32,7 @@ const ExerciseSchema = new mongoose.Schema({
         get: v => v.toDateString(),
     },
 });
+ExerciseSchema.set('toJSON', { getters: true, virtuals: false });
 
 const UserSchema = new mongoose.Schema({
     _id: {
