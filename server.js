@@ -38,7 +38,15 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    log: [ExerciseSchema],
+    log: {
+        type: [ExerciseSchema],
+        select: false,
+    },
+    // hide default mongoose version key
+    __v: {
+        type: Number,
+        select: false
+    }
 });
 
 
@@ -77,7 +85,7 @@ app.post('/api/exercise/new-user', async (req, res) => {
 // get users list
 app.get('/api/exercise/users', async (req, res) => {
     try {
-        const users = await User.find({}, "username");
+        const users = await User.find();
         return res.json(users);
     } catch (e) {
         return res.json(e);
