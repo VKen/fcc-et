@@ -29,9 +29,7 @@ const ExerciseSchema = new mongoose.Schema({
             var v = new Date(v);
             return new Date(v.getFullYear(), v.getMonth(), v.getDate());
         },
-        get: v => {
-            return v.toDateString();
-        }
+        get: v => v.toDateString(),
     },
 });
 
