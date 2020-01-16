@@ -25,6 +25,13 @@ const ExerciseSchema = new mongoose.Schema({
     date: {
         type: Date,
         required: true,
+        set: v => {
+            var v = new Date(v);
+            return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+        },
+        get: v => {
+            return v.toDateString();
+        }
     },
 });
 
@@ -92,6 +99,45 @@ app.get('/api/exercise/users', async (req, res) => {
     }
 });
 
+// user add exercise
+app.post('/api/exercise/add', async (req, res) => {
+    try {
+        const result = await User.findByIdAndUpdate(
+            req.body.userId, {
+                $push: {
+                    log: {
+                        description: req.body.description,
+                        duration: req.body.duration,
+                        date: req.body.date,
+                    }
+                }
+            },
+            {
+                runValidators: true,
+                new: true,
+                select: {
+                    _id: 1,
+                    username: 1,
+                    log: {
+                        $slice: -1,
+                    },
+                },
+            }
+        );
+        if (!result) {
+            return res.status(422).send('unknown _id');
+        }
+        res.json({
+            username: result.username,
+            _id: result._id,
+            description: result.log[0].description,
+            duration: result.log[0].duration,
+            date: result.log[0].date,
+        })
+    } catch (e) {
+        res.status(422).set('content-type', 'text/plain').send(e.reason.message);
+    }
+});
 // Not found middleware
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
