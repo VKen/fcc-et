@@ -137,6 +137,68 @@ app.post('/api/exercise/add', async (req, res) => {
         res.status(422).set('content-type', 'text/plain').send(e.reason.message);
     }
 });
+
+// user search exercise in date range
+app.get('/api/exercise/log', async (req, res) => {
+    let user, filter, v;
+    // validate request query params
+    const required = 'userId';
+    const optional = ['from', 'to', 'limit'];
+
+    if (!Object.keys(req.query).includes(required)) {
+        return res.status(422).send(`missing query param: ${required}`);
+    }
+
+    try {
+        //user = User.findById(req.query.userId, "_id username log.description log.duration log.date");
+        //
+        var aggregation_pipelines = [
+            {$match: {_id: req.query.userId}},
+            {$project: { _id: 1, username: 1, log: 1}},
+        ]
+
+        if (req.query.from || req.query.to) {
+            filter = {
+                $filter: {
+                    input: "$log",
+                    as: "log_item",
+                    cond: {
+                    }
+                }
+            };
+            if (req.query.from) {
+                v = new Date(req.query.from);
+                if (v == "Invalid Date") throw new Error(`Invalid "from" date string`);
+                filter.$filter.cond["$gte"] = ["$$log_item.date", new Date(v.getFullYear(), v.getMonth(), v.getDate())];
+            }
+
+            if (req.query.to) {
+                v = new Date(req.query.from);
+                if (v == "Invalid Date") throw new Error(`Invalid "to" date string`);
+                filter.$filter.cond["$lte"] = ["$$log_item.date", new Date(v.getFullYear(), v.getMonth(), v.getDate())];
+            }
+            aggregation_pipelines[1].$project.log = filter;
+        }
+
+        if (req.query.limit) {
+            if (req.query.limit != parseInt(req.query.limit)) throw new Error(`Invalid "limit" input`);
+            aggregation_pipelines.push({$limit: parseInt(req.query.limit)});
+        }
+
+        console.log(aggregation_pipelines);
+
+        let result = await User.aggregate(aggregation_pipelines);
+
+        console.log(result);
+        if (!result.length){
+            return res.send('no such userId');
+        }
+        return res.json(result[0]);
+    } catch (e) {
+        res.status(422).send(e.message);
+    }
+})
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
