@@ -15,7 +15,7 @@
 		"shortid": "^2.2.15"
 	},
 	"engines": {
-		"node": "6.9.1"
+		"node": "13.6.0"
 	},
 	"repository": {
 		"url": "https://gomix.com/#!/project/welcome-project"
